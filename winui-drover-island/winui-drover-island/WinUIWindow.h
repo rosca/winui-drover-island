@@ -39,9 +39,12 @@ private:
 
 	winrt::Microsoft::UI::Xaml::Window mWindow{ nullptr };
 	winrt::Microsoft::UI::Xaml::Controls::Button::Click_revoker mClickRevoker;
+	winrt::Microsoft::UI::Xaml::Controls::CheckBox::Checked_revoker mCheckedRevoker;
+	winrt::Microsoft::UI::Xaml::Controls::CheckBox::Unchecked_revoker mUncheckedRevoker;
 	Type mControlType = Type::None;
 	winrt::Microsoft::UI::Xaml::Controls::Border mCanvasContainer{ nullptr };
 	winrt::Microsoft::UI::Xaml::Controls::TextBlock mDescription{ nullptr };
+	bool mUseVSIS = false;
 };
 
 }  // namespace winui_drover_island

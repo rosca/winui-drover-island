@@ -42,7 +42,25 @@ using namespace winui_drover_island;
 
 namespace winrt::winui_drover_island::implementation {
 
-CanvasControl::CanvasControl() : containerDpi_(kDefaultDpi) {
+namespace {
+
+class VirtualSurfaceCallback : public winrt::implements<VirtualSurfaceCallback, IVirtualSurfaceUpdatesCallbackNative> {
+public:
+    explicit VirtualSurfaceCallback(std::function<HRESULT()>&& fn) : callback_(std::move(fn)) {}
+
+    ~VirtualSurfaceCallback() {
+        callback_ = nullptr;
+    }
+
+    HRESULT UpdatesNeeded() { return callback_(); }
+
+private:
+    std::function<HRESULT()> callback_;
+};
+
+}
+
+CanvasControl::CanvasControl(bool useVSIS) : containerDpi_(kDefaultDpi), useVSIS_(useVSIS) {
     Image image;
     Content(image);
     image.Stretch(winrt::Stretch::Fill);
@@ -298,6 +316,11 @@ void CanvasControl::invalidateDueToInternalChange() {
         return;
     }
 
+    if (useVSIS_) {
+        auto result = runWithDevice([this]() { return ensureVirtualSurfaceImageSource(); });
+        LogIfFailed(result, "ensureVirtualSurfaceImageSource");
+    }
+
     invalidate();
 }
 
@@ -310,7 +333,114 @@ void CanvasControl::invalidate() {
         return;
     }
 
-    setupRenderingCallback();
+    if (useVSIS_) {
+        if (currentTarget_.surface_) {
+            if (auto vsisNative = currentTarget_.surface_.as<IVirtualSurfaceImageSourceNative>()) {
+                winrt::Rect rc{ 0, 0, currentTarget_.size_.Width, currentTarget_.size_.Height };
+                LogIfFailed(vsisNative->Invalidate(toRECT(rc, currentTarget_.dpi_)), "Invalidate");
+            }
+        }
+    }
+    else {
+        setupRenderingCallback();
+    }
+}
+
+
+HRESULT CanvasControl::ensureVirtualSurfaceImageSource() {
+    assert(useVSIS_);
+
+    const auto& newSize = containerSize_;
+    const auto& newDpi = containerDpi_;
+
+    bool surfaceNotCreated = (currentTarget_.surface_ == nullptr);
+    bool dpiChanged = (currentTarget_.dpi_ != newDpi);
+    bool sizeChanged = (currentTarget_.size_ != newSize);
+
+    if (!surfaceNotCreated && !dpiChanged && !sizeChanged) {
+        return S_OK;
+    }
+
+    assert(newSize.Width > 0 && newSize.Height > 0);
+
+    auto actualPixelsWidth = sizeDipsToPixels(newSize.Width, newDpi);
+    auto actualPixelsHeight = sizeDipsToPixels(newSize.Height, newDpi);
+
+    assert(actualPixelsWidth > 0 && actualPixelsHeight > 0);
+
+    winrt::Imaging::VirtualSurfaceImageSource surface{ nullptr };
+    if (surfaceNotCreated) {
+        surface = winrt::Imaging::VirtualSurfaceImageSource{ actualPixelsWidth, actualPixelsHeight, false };
+    }
+    else {
+        surface = currentTarget_.surface_.as<winrt::Imaging::VirtualSurfaceImageSource>();
+    }
+
+    auto sisNative = objectAs<IVirtualSurfaceImageSourceNative>(surface);
+    HRESULT hResult = S_OK;
+    if (surfaceNotCreated) {
+        auto wThis = get_weak();
+        auto callback = winrt::make_self<VirtualSurfaceCallback>([wThis]() -> HRESULT {
+            // This function can throw, since the exceptions will be caught in VirtualSurfaceCallback
+            auto pThis = wThis.get();
+
+            if (!pThis || !pThis->useVSIS_ || !pThis->currentTarget_.surface_ || pThis->asyncResetPending_) {
+                return E_FAIL;
+            }
+            return pThis->runWithDevice([&]() { return pThis->performVirtualImageSourceDraw(); });
+        });
+        hResult = sisNative->RegisterForUpdatesNeeded(callback.get());
+        RenderTarget target{ surface, newSize, newDpi };
+        setRenderTarget(target);
+        setImageSource(surface);
+    }
+    else {
+        assert(dpiChanged || sizeChanged);
+        assert(!surfaceNotCreated);
+
+        hResult = sisNative->Resize(actualPixelsWidth, actualPixelsHeight);
+        if (SUCCEEDED(hResult)) {
+            RECT updateRect = { 0, 0, actualPixelsWidth, actualPixelsHeight };
+            LogIfFailed(sisNative->Invalidate(updateRect), "sisNative->Invalidate(updateRect)");
+            currentTarget_.dpi_ = newDpi;
+            currentTarget_.size_ = newSize;
+        }
+    }
+
+    assert(currentTarget_.surface_);
+
+    return hResult;
+}
+
+HRESULT CanvasControl::performVirtualImageSourceDraw() {
+    assert(useVSIS_);
+    assert(currentTarget_.surface_);
+    assert(!asyncResetPending_);
+
+    auto vsisNative = objectAs<IVirtualSurfaceImageSourceNative>(currentTarget_.surface_);
+    auto sisNative = vsisNative.as<ISurfaceImageSourceNativeWithD2D>();
+    DWORD updateRectCount = 0;
+    ReturnIfFailed(vsisNative->GetUpdateRectCount(&updateRectCount));
+    if (updateRectCount == 0) {
+        return S_OK;
+    }
+
+    std::vector<RECT> updateRECTs(updateRectCount);
+    ReturnIfFailed(vsisNative->GetUpdateRects(updateRECTs.data(), updateRectCount));
+
+    std::vector<winrt::Rect> updateRects;
+    updateRects.reserve(updateRECTs.size());
+    std::transform(updateRECTs.begin(), updateRECTs.end(), std::back_inserter(updateRects), [&](const RECT& r) {
+        return toRect(r, currentTarget_.dpi_);
+    });
+
+    RECT visibleBounds;
+    ReturnIfFailed(vsisNative->GetVisibleBounds(&visibleBounds));
+
+    for (auto& updateRect : updateRECTs) {
+        ReturnIfFailed(performD2DDraw(sisNative.get(), updateRect));
+    }
+    return S_OK;
 }
 
 }  // namespace winrt::winui_drover_island::implementation

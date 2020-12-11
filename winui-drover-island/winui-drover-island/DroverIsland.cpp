@@ -23,6 +23,10 @@ using namespace winrt::Windows::Foundation;
 
 namespace winui_drover_island {
 
+DroverIsland::DroverIsland(bool useVSIS) : CanvasControl(useVSIS) {
+
+}
+
 
 void DroverIsland::draw(const winrt::com_ptr<ID2D1DeviceContext>& context, const D2D_RECT_F&) {
 	// beginDraw and endDraw are not needed. The DPI, offset translation has been taken care of.

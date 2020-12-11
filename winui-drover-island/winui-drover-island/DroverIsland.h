@@ -19,8 +19,8 @@ namespace winui_drover_island {
 
 class DroverIsland : public winrt::winui_drover_island::implementation::CanvasControl {
  public:
-    DroverIsland() = default;
-    ~DroverIsland() = default;
+    explicit DroverIsland(bool useVSIS);
+    ~DroverIsland() override = default;
 
 protected:
     void draw(const winrt::com_ptr<ID2D1DeviceContext>&, const D2D_RECT_F& updateRect) override;

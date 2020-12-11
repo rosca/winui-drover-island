@@ -23,6 +23,10 @@ using namespace winrt::Windows::Foundation;
 
 namespace winui_drover_island {
 
+EllipseShape::EllipseShape(bool useVSIS) : CanvasControl(useVSIS) {
+
+}
+
 void EllipseShape::draw(const winrt::com_ptr<ID2D1DeviceContext>& context, const D2D_RECT_F& rect) {
 	// beginDraw and endDraw are not needed. The DPI, offset translation has been taken care of.
 	// It is ok to throw, the control will handle the exceptions.

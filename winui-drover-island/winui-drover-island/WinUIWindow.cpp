@@ -66,6 +66,13 @@ void WinUIWindow::addContent() {
 	auto grid = createGrid();
 	mWindow.Content(grid);
 
+	auto checkbox = CheckBox{};
+	checkbox.Margin({ 20, 0, 0, 0 });
+	checkbox.Content(winrt::box_value(L"Enable Virtual Surface"));
+	mCheckedRevoker = checkbox.Checked(winrt::auto_revoke, [this](const IInspectable&, const RoutedEventArgs&) { mUseVSIS = true; });
+	mUncheckedRevoker = checkbox.Unchecked(winrt::auto_revoke, [this](const IInspectable&, const RoutedEventArgs&) { mUseVSIS = false; });
+	grid.Children().Append(checkbox);
+
 	auto title = TextBlock{};
 	title.Text(L"Playground for supporting Drover Islands in WinUI");
 	grid.Children().Append(title);
@@ -125,12 +132,12 @@ void WinUIWindow::renderCanvasControl(Type type) {
 		break;
 	}
 	case Type::Ellipse: {
-		auto ellipse = winrt::make_self<winui_drover_island::EllipseShape>();
+		auto ellipse = winrt::make_self<winui_drover_island::EllipseShape>(mUseVSIS);
 		mCanvasContainer.Child(*ellipse);
 		break;
 	}
 	case Type::DroverSample: {
-		auto droverIsland = winrt::make_self<winui_drover_island::DroverIsland>();
+		auto droverIsland = winrt::make_self<winui_drover_island::DroverIsland>(mUseVSIS);
 		mCanvasContainer.Child(*droverIsland);
 		break;
 	}

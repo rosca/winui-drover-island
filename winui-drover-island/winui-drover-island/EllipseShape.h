@@ -19,8 +19,8 @@ namespace winui_drover_island {
 
 class EllipseShape : public winrt::winui_drover_island::implementation::CanvasControl {
  public:
-     EllipseShape() = default;
-    ~EllipseShape() = default;
+    explicit EllipseShape(bool useVSIS);
+    ~EllipseShape() override = default;
 
 protected:
     void draw(const winrt::com_ptr<ID2D1DeviceContext>&, const D2D_RECT_F& updateRect) override;

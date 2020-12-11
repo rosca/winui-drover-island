@@ -47,7 +47,7 @@ class CanvasControl : public CanvasControlT<CanvasControl> {
     void invalidate();
 
  protected:
-    CanvasControl();
+    explicit CanvasControl(bool useVSIS);
 
     virtual void draw(const com_ptr<ID2D1DeviceContext>&, const D2D_RECT_F& updateRect) = 0;
     virtual void createResources(const std::shared_ptr<GfxD2DDevice>&) {}
@@ -88,6 +88,10 @@ class CanvasControl : public CanvasControlT<CanvasControl> {
     void setupRenderingCallback();
     void removeRenderingCallback();
 
+    // Virtual surface specific methods
+    HRESULT ensureVirtualSurfaceImageSource();
+    HRESULT performVirtualImageSourceDraw();
+
     FrameworkElement::Loaded_revoker loadedHandler_;
     XamlRoot::Changed_revoker rootChangedHandler_;
     CompositionTarget::Rendering_revoker compositorRenderingHandler_;
@@ -104,6 +108,8 @@ class CanvasControl : public CanvasControlT<CanvasControl> {
     bool loaded_ = false;
 
     bool asyncResetPending_ = false;
+
+    const bool useVSIS_ = false;
 };
 
 }  // namespace winui_drover_island
