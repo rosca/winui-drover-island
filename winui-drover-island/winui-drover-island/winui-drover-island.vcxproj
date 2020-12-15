@@ -102,7 +102,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CanvasControl.h" />
+    <ClInclude Include="DialogsAndPopupsDemo.h" />
     <ClInclude Include="DroverIsland.h" />
+    <ClInclude Include="DroverIslandDemo.h" />
     <ClInclude Include="EllipseShape.h" />
     <ClInclude Include="GfxD2DDeviceManager.h" />
     <ClInclude Include="GfxUtils.h" />
@@ -117,7 +119,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CanvasControl.cpp" />
+    <ClCompile Include="DialogsAndPopupsDemo.cpp" />
     <ClCompile Include="DroverIsland.cpp" />
+    <ClCompile Include="DroverIslandDemo.cpp" />
     <ClCompile Include="EllipseShape.cpp" />
     <ClCompile Include="GfxD2DDeviceManager.cpp" />
     <ClCompile Include="GfxUtils.cpp" />
