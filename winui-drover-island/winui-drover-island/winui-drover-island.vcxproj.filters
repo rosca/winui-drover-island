@@ -16,6 +16,7 @@
     <ClCompile Include="GfxUtils.cpp" />
     <ClCompile Include="EllipseShape.cpp" />
     <ClCompile Include="DroverIslandDemo.cpp" />
+    <ClCompile Include="DialogsAndPopupsDemo.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -26,6 +27,7 @@
     <ClInclude Include="GfxUtils.h" />
     <ClInclude Include="EllipseShape.h" />
     <ClInclude Include="DroverIslandDemo.h" />
+    <ClInclude Include="DialogsAndPopupsDemo.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Assets">

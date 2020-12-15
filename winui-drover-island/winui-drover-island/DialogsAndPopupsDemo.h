@@ -14,30 +14,26 @@
 #pragma once
 
 #include <winrt/Microsoft.UI.Xaml.h>
-#include <winrt/winui_drover_island.h>
-
-#include "DroverIslandDemo.h"
-#include "DialogsAndPopupsDemo.h"
 
 namespace winui_drover_island {
 
-class WinUIWindow
-{
+class DialogsAndPopupsDemo {
+	using Click_revoker = winrt::Microsoft::UI::Xaml::Controls::Button::Click_revoker;
+
+	Click_revoker mRevokeDialogButton;
+	Click_revoker mRevokePopupButton;
+	winrt::Microsoft::UI::Xaml::Controls::ContentDialog mDialog;
+	winrt::Microsoft::UI::Xaml::Controls::Primitives::Popup mPopup;
+	winrt::Microsoft::UI::Xaml::Controls::LayoutPanel mErrorPanel;
+	winrt::Microsoft::UI::Xaml::Controls::TextBlock mErrorText;
+	winrt::Microsoft::UI::Xaml::Controls::StackPanel mRoot;
+
+	template <typename Fn>
+	void tryFn(Fn&&);
 public:
-	WinUIWindow();
-
-	void create();
-	void addContent();
-	void show();
-
-	const winrt::Microsoft::UI::Xaml::Window& window() const {
-		return mWindow;
-	};
-
-private:
-	winrt::Microsoft::UI::Xaml::Window mWindow{ nullptr };
-	DroverIslandDemo mDroverIslandDemo;
-	DialogsAndPopupsDemo mDialogsAndPopupsDemo;
+	DialogsAndPopupsDemo();
+	~DialogsAndPopupsDemo();
+	winrt::Microsoft::UI::Xaml::UIElement content() const;
 };
 
-}  // namespace winui_drover_island
+}
