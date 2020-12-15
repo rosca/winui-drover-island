@@ -4,8 +4,6 @@
     <ApplicationDefinition Include="App.xaml" />
   </ItemGroup>
   <ItemGroup>
-    <Midl Include="App.idl" />
-    <Midl Include="MainWindow.idl" />
     <Midl Include="CanvasControl.idl" />
   </ItemGroup>
   <ItemGroup>
@@ -17,6 +15,7 @@
     <ClCompile Include="DroverIsland.cpp" />
     <ClCompile Include="GfxUtils.cpp" />
     <ClCompile Include="EllipseShape.cpp" />
+    <ClCompile Include="DroverIslandDemo.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -26,6 +25,7 @@
     <ClInclude Include="DroverIsland.h" />
     <ClInclude Include="GfxUtils.h" />
     <ClInclude Include="EllipseShape.h" />
+    <ClInclude Include="DroverIslandDemo.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Assets">
