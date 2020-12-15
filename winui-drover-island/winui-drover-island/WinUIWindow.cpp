@@ -31,7 +31,13 @@ void WinUIWindow::create() {
 }
 
 void WinUIWindow::addContent() {
-	mWindow.Content(mDroverIslandDemo.createContent());
+	PivotItem droverIslandDemo;
+	droverIslandDemo.Header(winrt::box_value(L"Drover Island"));
+	droverIslandDemo.Content(mDroverIslandDemo.createContent());
+
+	Pivot demos;
+	demos.Items().Append(std::move(droverIslandDemo));
+	mWindow.Content(demos);
 }
 
 void WinUIWindow::show() {
