@@ -126,6 +126,12 @@ DialogsAndPopupsDemo::DialogsAndPopupsDemo() {
 
 	mDialog.CloseButtonText(L"Close");
 	mDialog.Content(winrt::box_value(L"Dialog Content"));
+
+	/* 
+		Setting the MaxWidth to some small value makes the dialog not appear
+		at center.
+	*/
+	mDialog.MaxWidth(500);
 }
 
 DialogsAndPopupsDemo::~DialogsAndPopupsDemo() {
